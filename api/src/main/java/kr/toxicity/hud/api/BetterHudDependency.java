@@ -50,7 +50,7 @@ public class BetterHudDependency {
     public static final BetterHudDependency GSON = new BetterHudDependency(
             "com{}google{}code{}gson",
             "gson",
-            "2.13.2",
+            "2.14.0",
             false,
             Collections.unmodifiableSet(EnumSet.of(
                     BetterHudPlatform.VELOCITY
@@ -62,7 +62,7 @@ public class BetterHudDependency {
     public static final BetterHudDependency SNAKEYAML = new BetterHudDependency(
             "org{}yaml",
             "snakeyaml",
-            "2.5",
+            "2.6",
             false,
             Collections.unmodifiableSet(EnumSet.of(
                     BetterHudPlatform.VELOCITY,
