@@ -18,8 +18,8 @@ configurations {
 dependencies {
     minecraft("com.mojang:minecraft:$minecraft")
     // Other mod dependency
-    implementation("eu.pb4:polymer-resource-pack:0.16.2+26.1.1")
-    implementation("eu.pb4:polymer-autohost:0.16.2+26.1.1")
+    implementation("eu.pb4:polymer-resource-pack:0.16.4+26.1.2")
+    implementation("eu.pb4:polymer-autohost:0.16.4+26.1.2")
     implementation("eu.pb4:placeholder-api:3.0.0+26.1")
     implementation("net.luckperms:api:5.5")
     implementation("org.checkerframework:checker-qual:4.1.0")
