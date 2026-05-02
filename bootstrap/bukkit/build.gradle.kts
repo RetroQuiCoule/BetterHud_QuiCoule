@@ -16,6 +16,7 @@ dependencies {
     shade(project(":scheduler:standard")) { isTransitive = false }
     shade(project(":scheduler:paper")) { isTransitive = false }
 
+    shade(project(":nms:v1_21_R1", configuration = "reobf")) { isTransitive = false }
     shade(project(":nms:v1_21_R2", configuration = "reobf")) { isTransitive = false }
     shade(project(":nms:v1_21_R3", configuration = "reobf")) { isTransitive = false }
     shade(project(":nms:v1_21_R4", configuration = "reobf")) { isTransitive = false }
@@ -28,7 +29,7 @@ dependencies {
     shade(libs.kotlinStdlib)
 
     compileOnly(libs.adventure.platform.bukkit)
-    compileOnly(shade(rootProject.fileTree("shaded"))!!)
+    compileOnly(shade(fileTree("shaded"))!!)
 
     compileOnly("io.lumine:Mythic-Dist:5.12.0")
     compileOnly("io.lumine:MythicLib-dist:1.7.1-SNAPSHOT")

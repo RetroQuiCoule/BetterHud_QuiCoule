@@ -8,10 +8,6 @@ import lombok.Getter;
 @Getter
 public enum NMSVersion {
     /**
-     * 1.20.5-1.20.6
-     */
-    V1_20_R4(20,4, 32),
-    /**
      * 1.21-1.21.1
      */
     V1_21_R1(21,1, 34),
