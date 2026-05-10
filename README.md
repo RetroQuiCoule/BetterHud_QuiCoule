@@ -8,6 +8,7 @@ Vibe-Coded Forked Gemini Pro 3.1, Fix play_once, and add a specific usecase for 
 ### Specific Forked animation exemple
 ``` yaml
 qte_annimation:
+  # Conditions globales du Layout (Gère l'apparition et la disparition)
   conditions:
     1:
       first: "string:team"
@@ -17,7 +18,8 @@ qte_annimation:
       first: (number)string:qte_timer
       second: 0
       operation: '>'
-      
+
+  # Éléments visuels affichés lorsque les conditions sont remplies
   images:
     1:
       name: qte_cursor
@@ -25,13 +27,14 @@ qte_annimation:
       scale: 1.5
       x: 0
       y: -70
-      
+
+  # Animation de translation linéaire (Nécessite le fork personnalisé de BetterHud)
   animations:
     type: play_once
-    duration: 100
-    start-x: 150
-    end-x: -150
-    start-y: 0
+    duration: 100 # Vitesse : Temps de trajet de A vers B (100 ticks = 5 secondes)
+    start-x: 150  # Point A (Départ)
+    end-x: -150   # Point B (Arrivée)
+    start-y: 0    # Maintien de l'axe vertical
     end-y: 0
 ```
 
