@@ -1,58 +1,66 @@
 import xyz.jpenilla.resourcefactory.bukkit.Permission
 
 plugins {
-    alias(libs.plugins.conventions.bootstrap)
-    alias(libs.plugins.conventions.bukkit)
-    alias(libs.plugins.resourcefactory.bukkit)
-    alias(libs.plugins.shadow)
+    alias(libs.plugins.bootstrapConvention)
+    alias(libs.plugins.resourceFactoryBukkit)
+}
+
+repositories {
+    maven("https://maven.enginehub.org/repo/") //WorldEdit, WorldGuard
+    maven("https://nexus.phoenixdevt.fr/repository/maven-public/") //MMOItems, MMOCore, MythicLib
+    maven("https://repo.skriptlang.org/releases") //Skript
+    maven("https://repo.alessiodp.com/releases/") //Parties
+    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") //PlaceholderAPI
+    maven("https://mvn.lumine.io/repository/maven/") //MythicMobs
+    maven("https://repo.momirealms.net/releases/") //CraftEngine
+    maven("https://repo.nexomc.com/releases/") //Nexo
+    maven("https://jitpack.io") //Vault
 }
 
 dependencies {
-    shade(project(":api:bukkit-api")) { isTransitive = false }
+    compileOnly("org.spigotmc:spigot-api:${property("minecraft_version")}-R0.1-SNAPSHOT")
+    compileOnly(libs.bundles.adventure)
 
-    shade(project(":bedrock:geyser")) { isTransitive = false }
-    shade(project(":bedrock:floodgate")) { isTransitive = false }
+    compileOnly(shade(project(":api:standard-api"))!!)
+    compileOnly(shade(project(":api:bukkit-api"))!!)
+    testImplementation(project(":api:bukkit-api"))
+    rootProject.project("bedrock").subprojects.forEach {
+        compileOnly(shade(it)!!)
+    }
+    rootProject.project("scheduler").subprojects.forEach {
+        compileOnly(shade(it)!!)
+    }
+    rootProject.project("nms").subprojects.forEach {
+        compileOnly(shade(project(":nms:${it.name}", configuration = "reobf"))!!)
+        //compileOnly(shade(it)!!)
+    }
+    compileOnly(libs.bstatsBukkit)
+    shade(libs.bstatsBukkit)
+    compileOnly(libs.adventurePlatformBukkit)
+    compileOnly(shade(rootProject.fileTree("shaded"))!!)
 
-    shade(project(":scheduler:standard")) { isTransitive = false }
-    shade(project(":scheduler:paper")) { isTransitive = false }
-
-    shade(project(":nms:v1_21_R1", configuration = "reobf")) { isTransitive = false }
-    shade(project(":nms:v1_21_R2", configuration = "reobf")) { isTransitive = false }
-    shade(project(":nms:v1_21_R3", configuration = "reobf")) { isTransitive = false }
-    shade(project(":nms:v1_21_R4", configuration = "reobf")) { isTransitive = false }
-    shade(project(":nms:v1_21_R5", configuration = "reobf")) { isTransitive = false }
-    shade(project(":nms:v1_21_R6", configuration = "reobf")) { isTransitive = false }
-    shade(project(":nms:v1_21_R7", configuration = "reobf")) { isTransitive = false }
-    shade(project(":nms:v26_R1")) { isTransitive = false }
-
-    shade(libs.bstats.bukkit)
-    shade(libs.kotlinStdlib)
-
-    compileOnly(libs.adventure.platform.bukkit)
-    compileOnly(shade(fileTree("shaded"))!!)
-
-    compileOnly("io.lumine:Mythic-Dist:5.12.0")
+    compileOnly("io.lumine:Mythic-Dist:5.11.1")
     compileOnly("io.lumine:MythicLib-dist:1.7.1-SNAPSHOT")
     compileOnly("net.Indyuce:MMOCore-API:1.13.1-SNAPSHOT")
     compileOnly("net.Indyuce:MMOItems-API:6.10.1-SNAPSHOT")
-    compileOnly("me.clip:placeholderapi:2.12.2")
-    compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.4.2") {
+    compileOnly("me.clip:placeholderapi:2.11.7")
+    compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.3.18") {
         exclude("com.google.guava")
         exclude("com.google.code.gson")
         exclude("it.unimi.dsi")
     }
-    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.16") {
+    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.14") {
         exclude("com.google.guava")
         exclude("com.google.code.gson")
         exclude("it.unimi.dsi")
     }
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
-    compileOnly("com.github.SkriptLang:Skript:2.15.2")
-    compileOnly("net.skinsrestorer:skinsrestorer-api:15.12.0")
+    compileOnly("com.github.SkriptLang:Skript:2.13.2")
+    compileOnly("net.skinsrestorer:skinsrestorer-api:15.9.1")
     compileOnly("com.alessiodp.parties:parties-bukkit:3.2.16")
-    compileOnly("net.momirealms:craft-engine-core:0.0.67")
-    compileOnly("net.momirealms:craft-engine-bukkit:0.0.67")
-    compileOnly("com.nexomc:nexo:1.21.0")
+    compileOnly("net.momirealms:craft-engine-core:0.0.66")
+    compileOnly("net.momirealms:craft-engine-bukkit:0.0.66")
+    compileOnly("com.nexomc:nexo:1.16.1")
 }
 
 bukkitPluginYaml {
@@ -146,38 +154,17 @@ bukkitPluginYaml {
     }
 }
 
-val shade = configurations.getByName("shade")
-val targetAttribute = manifestAttribute + mapOf("paperweight-mappings-namespace" to "spigot")
-val groupString = group.toString()
-
-tasks {
-    jar {
-        finalizedBy(shadowJar)
-    }
-    shadowJar {
-        configurations = listOf(shade)
-        archiveBaseName = "${rootProject.name}-bukkit"
-        archiveClassifier = ""
-        destinationDirectory = rootProject.layout.buildDirectory.dir("libs")
-        manifest {
-            attributes(targetAttribute)
-        }
-        dependencies {
-            exclude(dependency("org.jetbrains:annotations:13.0"))
-        }
-        fun prefix(pattern: String) {
-            relocate(pattern, "$groupString.shaded.$pattern")
-        }
-        prefix("kotlin")
-        prefix("kr.toxicity.command.impl")
-        prefix("org.bstats")
-        prefix("me.lucko.jarrelocator")
+tasks.jar {
+    archiveBaseName = "${rootProject.name}-bukkit"
+    destinationDirectory = rootProject.layout.buildDirectory.dir("libs")
+    manifest {
+        attributes["paperweight-mappings-namespace"] = "spigot"
     }
 }
 
 
 modrinth {
-    uploadFile.set(tasks.shadowJar)
+    uploadFile.set(tasks.jar)
     versionName = "BetterHud ${project.version} for Bukkit"
     gameVersions = SUPPORTED_MINECRAFT_VERSION
     loaders = listOf("bukkit", "spigot", "paper", "folia", "purpur")

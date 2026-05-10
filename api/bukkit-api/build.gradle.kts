@@ -1,8 +1,8 @@
 plugins {
-    alias(libs.plugins.conventions.api)
-    alias(libs.plugins.conventions.bukkit)
+    alias(libs.plugins.apiConvention)
 }
 
 dependencies {
-    api(project(":api"))
+    compileOnly("org.spigotmc:spigot-api:${property("minecraft_version")}-R0.1-SNAPSHOT")
+    implementation(project(":api:standard-api"))
 }

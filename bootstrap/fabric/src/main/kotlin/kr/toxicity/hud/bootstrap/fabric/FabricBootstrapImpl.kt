@@ -6,8 +6,8 @@ import kr.toxicity.hud.api.BetterHud
 import kr.toxicity.hud.api.BetterHudAPI
 import kr.toxicity.hud.api.BetterHudLogger
 import kr.toxicity.hud.api.adapter.WorldWrapper
-import kr.toxicity.hud.api.mod.ModBootstrap
-import kr.toxicity.hud.api.mod.event.EventRegistry
+import kr.toxicity.hud.api.fabric.FabricBootstrap
+import kr.toxicity.hud.api.fabric.event.EventRegistry
 import kr.toxicity.hud.api.player.HudPlayer
 import kr.toxicity.hud.api.scheduler.HudScheduler
 import kr.toxicity.hud.api.version.MinecraftVersion
@@ -44,7 +44,7 @@ import java.io.InputStream
 import java.net.URI
 import java.net.URLClassLoader
 
-class FabricBootstrapImpl : ModBootstrap, DedicatedServerModInitializer {
+class FabricBootstrapImpl : FabricBootstrap, DedicatedServerModInitializer {
 
     companion object {
         @JvmStatic
@@ -105,14 +105,14 @@ class FabricBootstrapImpl : ModBootstrap, DedicatedServerModInitializer {
                 .toFile()
             version = FabricLoader.getInstance().getModContainer(MOD_ID).map { c ->
                 c.metadata.version.friendlyString
-            }.orElse("unknown")!!
+            }.orElse("unknown")
             core = BetterHudImpl(this).apply {
                 BetterHudAPI.inst(this)
                 addReloadStartTask {
-                    ModBootstrap.PRE_RELOAD_EVENT.call(EventRegistry.UNIT)
+                    FabricBootstrap.PRE_RELOAD_EVENT.call(EventRegistry.UNIT)
                 }
                 addReloadEndTask { state ->
-                    ModBootstrap.POST_RELOAD_EVENT.call(state)
+                    FabricBootstrap.POST_RELOAD_EVENT.call(state)
                 }
             }
             volatileCode = FabricVolatileCode()
@@ -228,7 +228,7 @@ class FabricBootstrapImpl : ModBootstrap, DedicatedServerModInitializer {
 
     override fun minecraftVersion(): MinecraftVersion = MinecraftVersion.LATEST
 
-    override fun mcmetaVersion(): Int = 84
+    override fun mcmetaVersion(): Int = 75
 
     fun wrap(world: ServerLevel): WorldWrapper {
         val levelName = world.dimension().identifier().path

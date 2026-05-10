@@ -14,6 +14,9 @@ import kr.toxicity.hud.placeholder.Placeholder
 import kr.toxicity.hud.placeholder.PlaceholderBuilder
 import kr.toxicity.hud.placeholder.PlaceholderSource
 import kr.toxicity.hud.resource.GlobalResource
+import kr.toxicity.hud.util.JavaBoolean
+import kr.toxicity.hud.util.JavaNumber
+import kr.toxicity.hud.util.JavaString
 import kr.toxicity.hud.util.ifNull
 import java.io.File
 import java.text.DecimalFormat
@@ -34,7 +37,7 @@ object PlaceholderManagerImpl : PlaceholderManager, BetterHudManager {
 
     private val number = PlaceholderContainerImpl(
         "number",
-        Number::class.javaObjectType,
+        JavaNumber::class.java,
         0.0,
         mapOf(
             "popup_count" to HudPlaceholder.of { _, _ ->
@@ -79,7 +82,7 @@ object PlaceholderManagerImpl : PlaceholderManager, BetterHudManager {
     )
     private val string = PlaceholderContainerImpl(
         "string",
-        String::class.javaObjectType,
+        JavaString::class.java,
         "<none>",
         mapOf(
             "string" to HudPlaceholder.builder<String>()
@@ -96,7 +99,7 @@ object PlaceholderManagerImpl : PlaceholderManager, BetterHudManager {
             if (matcher.find()) matcher.group("content") else null
         },
         {
-            it
+            it.toString()
         },
         mapOf(
             "trim" to { s, e ->
@@ -120,12 +123,12 @@ object PlaceholderManagerImpl : PlaceholderManager, BetterHudManager {
             }
         ),
         { a, _ ->
-            a
+            a.toString()
         }
     )
     private val boolean = PlaceholderContainerImpl(
         "boolean",
-        Boolean::class.javaObjectType,
+        JavaBoolean::class.java,
         false,
         mapOf(
             "boolean" to HudPlaceholder.builder<Boolean>()
@@ -190,7 +193,7 @@ object PlaceholderManagerImpl : PlaceholderManager, BetterHudManager {
                 }
             }
             return if (appliers.isEmpty()) get else object : HudPlaceholder<T> by get {
-                override fun invoke(args: List<String>, reason: UpdateEvent): Function<HudPlayer, T> {
+                override fun invoke(args: MutableList<String>, reason: UpdateEvent): Function<HudPlayer, T> {
                     val func = get(args, reason)
                     return Function {
                         var value = func.apply(it)

@@ -1,35 +1,50 @@
 import xyz.jpenilla.resourcefactory.fabric.Environment
 
 plugins {
-    alias(libs.plugins.conventions.bootstrap)
-    alias(libs.plugins.resourcefactory.fabric)
-    id("net.fabricmc.fabric-loom")
+    alias(libs.plugins.bootstrapConvention)
+    alias(libs.plugins.resourceFactoryFabric)
+    alias(libs.plugins.loom)
+}
+
+repositories {
+    maven("https://maven.nucleoid.xyz/") { //placeholderapi, polymer
+        name = "Nucleoid"
+    }
+    maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/") { //Kyori snapshot
+        name = "sonatype-oss-snapshots1"
+        mavenContent { snapshotsOnly() }
+    }
 }
 
 val minecraft = property("minecraft_version")
 val supportedVersion = property("supported_version")
 
-configurations {
-    include {
-        extendsFrom(shade.get())
-    }
-}
-
 dependencies {
     minecraft("com.mojang:minecraft:$minecraft")
-    // Other mod dependency
-    implementation("eu.pb4:polymer-resource-pack:0.16.4+26.1.2")
-    implementation("eu.pb4:polymer-autohost:0.16.4+26.1.2")
-    implementation("eu.pb4:placeholder-api:3.0.0+26.1")
-    implementation("net.luckperms:api:5.5")
-    implementation("org.checkerframework:checker-qual:4.1.0")
+    mappings(loom.layered {
+        officialMojangMappings()
+        parchment("io.papermc.parchment.data:parchment:${property("parchment")}")
+    })
+    //Other mod dependency
+    modCompileOnly("eu.pb4:polymer-resource-pack:0.15.1+1.21.11")
+    modCompileOnly("eu.pb4:polymer-autohost:0.15.1+1.21.11")
+    modCompileOnly("eu.pb4:placeholder-api:2.8.1+1.21.10")
+    modCompileOnly("net.luckperms:api:5.5")
+    compileOnly("org.checkerframework:checker-qual:3.52.1")
 
-    // Fabric
-    implementation(libs.bundles.fabric)
+    //Kyori
+    modCompileOnly("net.fabricmc:fabric-loader:${property("loader_version")}")
+    modCompileOnly("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
+    modCompileOnly("net.kyori:adventure-platform-mod-shared-fabric-repack:${property("kyori_mod_implementation")}")
+    modImplementation("net.kyori:adventure-platform-fabric:${property("kyori_mod_implementation")}")
+    compileOnly(project(":api:standard-api"))
+    implementation(include(project(":api:fabric-api"))!!)
+}
 
-    // Include
-    implementation(include("net.kyori:adventure-platform-fabric:${property("kyori_mod_implementation")}")!!)
-    implementation(include(project(":api:mod-api"))!!)
+loom {
+    decompilerOptions.named("vineflower") {
+        options.put("win", "0")
+    }
 }
 
 fabricModJson {
@@ -43,19 +58,14 @@ fabricModJson {
     license = listOf("MIT")
     environment = Environment.SERVER
     entrypoints = listOf(
-        serverEntrypoint("$group.bootstrap.fabric.FabricBootstrapImpl") {
-            adapter = "kotlin"
-        }
-    )
-    mixins = listOf(
-        mixin("betterhud.mixins.json")
+        serverEntrypoint("$group.bootstrap.fabric.FabricBootstrapImpl")
     )
     depends = mapOf(
-        "fabricloader" to listOf(">=${libs.versions.fabric.loader.get()}"),
-        "fabric-language-kotlin" to listOf(">=${libs.versions.fabric.language.kotlin.get()}"),
-        "fabric-api" to listOf("*"),
+        "fabricloader" to listOf("*"),
         "minecraft" to listOf("~$supportedVersion"),
-        "java" to listOf(">=25")
+        "java" to listOf(">=21"),
+        "fabric-api" to listOf("*"),
+        "betterhud-fabric-api" to listOf("*")
     )
     suggests = mapOf(
         "luckperms" to listOf("*"),
@@ -65,16 +75,15 @@ fabricModJson {
     )
 }
 
-val targetAttribute = manifestAttribute
-
 tasks {
     jar {
+        archiveClassifier = "dev"
+    }
+    remapJar {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         archiveBaseName = "${rootProject.name}-fabric+$minecraft"
         destinationDirectory = rootProject.layout.buildDirectory.dir("libs")
         archiveClassifier = ""
-        manifest {
-            attributes(targetAttribute)
-        }
     }
     runServer {
         enabled = false
@@ -83,14 +92,13 @@ tasks {
 
 
 modrinth {
-    uploadFile.set(tasks.jar)
+    uploadFile.set(tasks.remapJar)
     versionName = "BetterHud ${project.version} for Fabric"
     gameVersions = SUPPORTED_MINECRAFT_VERSION.subList(
         SUPPORTED_MINECRAFT_VERSION.indexOf(supportedVersion),
         SUPPORTED_MINECRAFT_VERSION.size
     )
     loaders = listOf("fabric", "quilt")
-    required.version("fabric-api", libs.versions.fabric.api.get())
-    required.version("fabric-language-kotlin", libs.versions.fabric.language.kotlin.get())
+    required.project("fabric-api")
     optional.project("polymer", "placeholder-api", "luckperms")
 }

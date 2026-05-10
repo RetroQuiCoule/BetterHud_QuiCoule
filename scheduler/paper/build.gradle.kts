@@ -1,8 +1,8 @@
 plugins {
-    alias(libs.plugins.conventions.standard)
+    alias(libs.plugins.standardConvention)
 }
 
 dependencies {
-    compileOnly(project(":api"))
-    compileOnly("io.papermc.paper:paper-api:${property("minecraft_version")}.build.+")
+    compileOnly(project(":api:standard-api"))
+    compileOnly("io.papermc.paper:paper-api:${property("minecraft_version")}-R0.1-SNAPSHOT")
 }

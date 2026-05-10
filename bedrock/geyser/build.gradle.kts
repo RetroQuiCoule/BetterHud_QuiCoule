@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.conventions.standard)
+    alias(libs.plugins.standardConvention)
 }
 
 dependencies {

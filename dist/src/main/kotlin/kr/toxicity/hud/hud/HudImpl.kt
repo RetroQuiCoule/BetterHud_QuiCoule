@@ -98,10 +98,32 @@ class HudImpl(
                 runByTick(tick, { player.tick }, p.getComponent(player))
             }
         }
+
+        // État local persistant pour ce joueur spécifique
+        var startTick = -1L
+        var wasVisible = false
+
         return HudComponentSupplier.of(this) {
-            if (conditions(player)) map.map { (type, element) ->
-                type.choose(element, player.tick)()
-            } else emptyList()
+            val isVisible = conditions(player)
+
+            if (isVisible) {
+                // Détecte le moment exact où le HUD devient visible
+                if (!wasVisible) {
+                    startTick = player.tick
+                }
+                wasVisible = true
+
+                // Calcule le temps écoulé depuis l'apparition
+                val localTick = if (startTick >= 0L) player.tick - startTick else 0L
+
+                map.map { (type, element) ->
+                    // On utilise localTick, donc PLAY_ONCE commencera toujours à l'index 0
+                    type.choose(element, localTick)()
+                }
+            } else {
+                wasVisible = false
+                emptyList()
+            }
         }
     }
 

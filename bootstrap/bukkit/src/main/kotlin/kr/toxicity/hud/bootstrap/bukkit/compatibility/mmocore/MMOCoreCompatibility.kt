@@ -30,7 +30,7 @@ class MMOCoreCompatibility : Compatibility {
     private fun PlayerData.modifier(skill: SkillHandler<*>, key: String) = getSkillLevel(skill).let { level ->
         profess.getSkill(skill.id)?.getParameter(key, level, this) ?: skill.getDefaultFormula(key).evaluate(level, player)
     }
-    
+
     private fun skill(name: String) = MythicLib.plugin.skills.getHandler(name) ?: throw RuntimeException("Unable to find that skill: $name")
 
     override val triggers: Map<String, (YamlObject) -> HudTrigger<*>>

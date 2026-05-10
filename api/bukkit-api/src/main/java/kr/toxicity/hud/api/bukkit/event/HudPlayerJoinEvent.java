@@ -1,6 +1,7 @@
 package kr.toxicity.hud.api.bukkit.event;
 
 import kr.toxicity.hud.api.player.HudPlayer;
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
@@ -9,24 +10,18 @@ import org.jetbrains.annotations.NotNull;
 /**
  * player's user data load event.
  */
+@Getter
 public class HudPlayerJoinEvent extends PlayerEvent implements HudPlayerEvent {
-
-    private final @NotNull HudPlayer player;
+    private final @NotNull HudPlayer hudPlayer;
 
     /**
      * Player joined.
-     * @param player target player
+     * @param hudPlayer target player
      */
-    public HudPlayerJoinEvent(@NotNull HudPlayer player) {
-        super((Player) player.handle());
-        this.player = player;
+    public HudPlayerJoinEvent(@NotNull HudPlayer hudPlayer) {
+        super((Player) hudPlayer.handle());
+        this.hudPlayer = hudPlayer;
     }
-
-    @Override
-    public @NotNull HudPlayer player() {
-        return player;
-    }
-
     /**
      * Gets event handler
      * @return handler
