@@ -18,6 +18,7 @@ import kr.toxicity.hud.manager.EncodeManager
 import kr.toxicity.hud.placeholder.PlaceholderSource
 import kr.toxicity.hud.resource.GlobalResource
 import kr.toxicity.hud.util.*
+import kr.toxicity.hud.layout.LayoutGroup // <-- Nouvel import ajouté ici !
 
 class HudImpl(
     override val id: String,
@@ -54,6 +55,7 @@ class HudImpl(
             PixelLocation(it)
         }  ?: PixelLocation.zero
         HudAnimation(
+            layout, // On injecte le layout pour accéder à ses conditions
             layout.animation.type,
             layout.animation.location.map {
                 HudParser(
@@ -83,7 +85,6 @@ class HudImpl(
         jsonArray = null
     }
 
-
     override fun getType(): HudObjectType<*> {
         return HudObjectType.HUD
     }
@@ -93,35 +94,39 @@ class HudImpl(
     private val conditions = section.toConditions(this) build UpdateEvent.EMPTY
 
     override fun createRenderer(player: HudPlayer): HudComponentSupplier<Hud> {
-        val map = elements.map {
-            it.animationType to it.elements.map { p ->
+        // Création des états isolés pour chaque Layout du HUD
+        val layoutEvaluators = elements.map { hudAnim ->
+            val layoutConds = hudAnim.layout.conditions build UpdateEvent.EMPTY
+            val evaluators = hudAnim.elements.map { p ->
                 runByTick(tick, { player.tick }, p.getComponent(player))
+            }
+
+            var startTick = -1L
+            var wasVisible = false
+
+            // Retourne une fonction qui gère sa propre visibilité
+            {
+                val isLayoutVisible = layoutConds(player)
+                if (isLayoutVisible) {
+                    if (!wasVisible) {
+                        startTick = player.tick
+                    }
+                    wasVisible = true
+                    val localTick = if (startTick >= 0L) player.tick - startTick else 0L
+
+                    hudAnim.animationType.choose(evaluators, localTick)()
+                } else {
+                    wasVisible = false
+                    null // Ignore ce layout s'il n'est pas censé être visible
+                }
             }
         }
 
-        // État local persistant pour ce joueur spécifique
-        var startTick = -1L
-        var wasVisible = false
-
         return HudComponentSupplier.of(this) {
-            val isVisible = conditions(player)
-
-            if (isVisible) {
-                // Détecte le moment exact où le HUD devient visible
-                if (!wasVisible) {
-                    startTick = player.tick
-                }
-                wasVisible = true
-
-                // Calcule le temps écoulé depuis l'apparition
-                val localTick = if (startTick >= 0L) player.tick - startTick else 0L
-
-                map.map { (type, element) ->
-                    // On utilise localTick, donc PLAY_ONCE commencera toujours à l'index 0
-                    type.choose(element, localTick)()
-                }
+            if (conditions(player)) {
+                // Exécute tous les layouts et filtre ceux qui sont cachés (null)
+                layoutEvaluators.mapNotNull { it() }
             } else {
-                wasVisible = false
                 emptyList()
             }
         }
@@ -144,6 +149,7 @@ class HudImpl(
     override fun isDefault(): Boolean = default
 
     private class HudAnimation(
+        val layout: LayoutGroup,
         val animationType: AnimationType,
         val elements: List<HudParser>
     )
