@@ -2,7 +2,40 @@
 
 ![-0001-export](https://github.com/toxicity188/BetterHud/assets/114675706/ccbf4bd3-9133-44ee-b277-985eae4349ae)
 
-Welcome to BetterHud!
+Welcome to BetterHud_QuiCoule!
+Vibe-Coded Forked Gemini Pro 3.1, Fix play_once, and add a specific usecase for fixed coordinate animation
+
+### Specific Forked animation exemple
+``` yaml
+qte_annimation:
+  # On place les conditions ICI, à la racine du layout
+  conditions:
+    1:
+      first: "string:team"
+      second: "'ByStander'"
+      operation: '=='
+    2:
+      first: (number)string:qte_timer
+      second: 0
+      operation: '>'
+      
+  images:
+    1:
+      # Les conditions ont été retirées d'ici
+      name: qte_cursor
+      align: center
+      scale: 1.5
+      x: 0
+      y: -70
+      
+  animations:
+    type: play_once
+    duration: 100
+    start-x: 150
+    end-x: -150
+    start-y: 0
+    end-y: 0
+```
 
 [SpigotMC](https://www.spigotmc.org/resources/115559/) | [Hangar](https://hangar.papermc.io/toxicity188/BetterHud) | [Modrinth](https://modrinth.com/plugin/betterhud2) | [Github](https://github.com/toxicity188/BetterHud)
 
